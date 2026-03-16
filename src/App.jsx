@@ -170,7 +170,7 @@ function QuotePage() {
   const [quoteNum] = useState(() => "TF-" + Date.now().toString(36).toUpperCase())
 
   useEffect(() => {
-    supabase.from('pumps').select('*').order('cat').order('model').then(({ data }) => data && setPumps(data))
+    supabase.from('pumps').select('*').order('sort_order', { ascending: true }).order('model', { ascending: true }).then(({ data }) => data && setPumps(data))
     supabase.from('customers').select('*').order('multiplier').order('name').then(({ data }) => data && setCustomers(data))
   }, [])
 
