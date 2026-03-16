@@ -185,7 +185,7 @@ function QuotePage() {
   const addToCart = p => { if (!cart.find(c => c.id === p.id)) setCart([...cart, { ...p, qty: 1, inStock: true }]) }
   const updateCart = (id, f, v) => setCart(cart.map(c => c.id === id ? { ...c, [f]: v } : c))
   const removeFromCart = id => setCart(cart.filter(c => c.id !== id))
-  const getPrice = i => Number(i.net_price) * multiplier * i.qty
+  const getPrice = i => Number(i.list_price) * multiplier * i.qty
   const total = cart.reduce((s, c) => s + getPrice(c), 0)
   const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
 
@@ -210,9 +210,9 @@ function QuotePage() {
             <div style={{ textAlign: "right", color: "#555", fontSize: 12, lineHeight: 1.8 }}><div><strong>Quote #:</strong> {quoteNum}</div><div><strong>Date:</strong> {today}</div><div><strong>Valid:</strong> 30 Days</div></div>
           </div>
           {(customer.name || customer.company) && <div style={{ marginBottom: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px 20px", fontSize: 13 }}>{customer.name && <div><span style={{ color: "#888" }}>Contact:</span> <strong>{customer.name}</strong></div>}{customer.company && <div><span style={{ color: "#888" }}>Company:</span> <strong>{customer.company}</strong></div>}{customer.email && <div><span style={{ color: "#888" }}>Email:</span> <strong>{customer.email}</strong></div>}{customer.phone && <div><span style={{ color: "#888" }}>Phone:</span> <strong>{customer.phone}</strong></div>}{customer.project && <div><span style={{ color: "#888" }}>Project:</span> <strong>{customer.project}</strong></div>}</div>}
-          <table><thead><tr>{["Category", "Model", "HP", "Voltage", "Connection", "Lead Time", "Qty", "Price", "Total"].map(h => <th key={h} style={{ background: OL, borderBottom: `2.5px solid ${O}`, textAlign: ["Price", "Total", "Qty"].includes(h) ? "right" : "left" }}>{h}</th>)}</tr></thead><tbody>
-            {cart.map((it, i) => { const lt = getLeadTime(it.cat, it.inStock); return (
-              <tr key={it.id} style={{ background: i % 2 === 0 ? "#fff" : "#FFFAF5" }}><td>{it.cat}</td><td style={{ fontWeight: 600 }}>{it.model}</td><td>{it.hp}</td><td>{it.voltage}</td><td>{it.connection}</td><td><span style={{ padding: "2px 8px", borderRadius: 10, fontSize: 10, fontWeight: 700, background: lt.includes("1") ? "#d4edda" : "#fff3cd", color: lt.includes("1") ? "#155724" : "#856404" }}>{lt}</span></td><td style={{ textAlign: "right" }}>{it.qty}</td><td style={{ textAlign: "right" }}>{fmt(Number(it.net_price) * multiplier)}</td><td style={{ textAlign: "right", fontWeight: 600 }}>{fmt(getPrice(it))}</td></tr>
+          <table><thead><tr>{["Category", "Model", "HP", "Voltage", "Connection", "Lead Time", "Qty", "List", "Customer Price", "Total"].map(h => <th key={h} style={{ background: OL, borderBottom: `2.5px solid ${O}`, textAlign: ["List", "Customer Price", "Total", "Qty"].includes(h) ? "right" : "left" }}>{h}</th>)}</tr></thead><tbody>
+            {cart.map((it, i) => { const lt = getLeadTime(it.cat, it.inStock); const custPrice = Number(it.list_price) * multiplier; return (
+              <tr key={it.id} style={{ background: i % 2 === 0 ? "#fff" : "#FFFAF5" }}><td>{it.cat}</td><td style={{ fontWeight: 600 }}>{it.model}</td><td>{it.hp}</td><td>{it.voltage}</td><td>{it.connection}</td><td><span style={{ padding: "2px 8px", borderRadius: 10, fontSize: 10, fontWeight: 700, background: lt.includes("1") ? "#d4edda" : "#fff3cd", color: lt.includes("1") ? "#155724" : "#856404" }}>{lt}</span></td><td style={{ textAlign: "right" }}>{it.qty}</td><td style={{ textAlign: "right", color: "#888" }}>{fmt(it.list_price)}</td><td style={{ textAlign: "right" }}>{fmt(custPrice)}</td><td style={{ textAlign: "right", fontWeight: 600 }}>{fmt(getPrice(it))}</td></tr>
             ) })}
           </tbody></table>
           <div style={{ textAlign: "right", paddingTop: 14, borderTop: `3px solid ${O}`, marginTop: 8 }}><span style={{ color: "#555", marginRight: 12 }}>Total:</span><span style={{ fontSize: 24, fontWeight: 800 }}>{fmt(total)}</span></div>
@@ -256,7 +256,7 @@ function QuotePage() {
         <div style={{ fontSize: 11, color: "#666", marginBottom: 6 }}>{filtered.length} items found</div>
         <div style={{ maxHeight: 340, overflowY: "auto", border: "1px solid #3a3a3a", borderRadius: 8 }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-            <thead><tr>{["Cat", "Model", "HP", "Voltage", "Connection", "PN", "Net", ""].map((h, i) => <th key={i} style={{ position: "sticky", top: 0, background: "#111", color: O, fontWeight: 700, fontSize: 10, padding: "8px 5px", textAlign: h === "Net" ? "right" : "left", borderBottom: `2px solid ${O}` }}>{h}</th>)}</tr></thead>
+            <thead><tr>{["Cat", "Model", "HP", "Voltage", "Connection", "PN", "List", ""].map((h, i) => <th key={i} style={{ position: "sticky", top: 0, background: "#111", color: O, fontWeight: 700, fontSize: 10, padding: "8px 5px", textAlign: h === "List" ? "right" : "left", borderBottom: `2px solid ${O}` }}>{h}</th>)}</tr></thead>
             <tbody>
               {filtered.map((p, i) => { const ic = cart.find(c => c.id === p.id); return (
                 <tr key={p.id} style={{ background: ic ? "#3a2a1a" : i % 2 === 0 ? "#2a2a2a" : "#222" }}>
@@ -266,7 +266,7 @@ function QuotePage() {
                   <td style={{ padding: "5px", color: "#ccc", fontSize: 11 }}>{p.voltage}</td>
                   <td style={{ padding: "5px", color: "#aaa", fontSize: 10 }}>{p.connection}</td>
                   <td style={{ padding: "5px", color: "#666", fontSize: 10 }}>{p.part_number}</td>
-                  <td style={{ padding: "5px", textAlign: "right", fontWeight: 600, color: "#fff" }}>{fmt(p.net_price)}</td>
+                  <td style={{ padding: "5px", textAlign: "right", fontWeight: 600, color: "#fff" }}>{fmt(p.list_price)}</td>
                   <td style={{ padding: "5px", textAlign: "center" }}>{ic ? <span style={{ color: O, fontWeight: 700, fontSize: 10 }}>✓</span> : <button onClick={() => addToCart(p)} style={{ background: O, color: "#fff", border: "none", borderRadius: 4, padding: "2px 10px", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>+</button>}</td>
                 </tr>
               ) })}
@@ -281,7 +281,7 @@ function QuotePage() {
           <h2 style={{ color: O, fontSize: 14, fontWeight: 700, marginBottom: 12 }}>Quote Items ({cart.length})</h2>
           {cart.map(item => { const lt = getLeadTime(item.cat, item.inStock); return (
             <div key={item.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: "1px solid #3a3a3a", flexWrap: "wrap" }}>
-              <div style={{ flex: 1, minWidth: 180 }}><div style={{ color: "#fff", fontWeight: 600, fontSize: 13 }}><span style={{ fontSize: 9, color: O, background: "#3a2a1a", borderRadius: 4, padding: "1px 5px", marginRight: 6 }}>{item.cat}</span>{item.model}</div><div style={{ color: "#888", fontSize: 11 }}>{item.hp !== "—" ? item.hp + " HP · " : ""}{item.voltage !== "—" ? item.voltage : ""}</div></div>
+              <div style={{ flex: 1, minWidth: 180 }}><div style={{ color: "#fff", fontWeight: 600, fontSize: 13 }}><span style={{ fontSize: 9, color: O, background: "#3a2a1a", borderRadius: 4, padding: "1px 5px", marginRight: 6 }}>{item.cat}</span>{item.model}</div><div style={{ color: "#888", fontSize: 11 }}>{item.hp !== "—" ? item.hp + " HP · " : ""}{item.voltage !== "—" ? item.voltage : ""} · List: {fmt(item.list_price)}</div></div>
               <div><label style={{ display: "block", fontSize: 10, color: "#666" }}>Qty</label><input type="number" min="1" value={item.qty} onChange={e => updateCart(item.id, "qty", Math.max(1, +e.target.value || 1))} style={{ width: 50, padding: "4px", borderRadius: 4, border: "1px solid #444", background: "#111", color: "#fff", textAlign: "center", fontSize: 12 }} /></div>
               {needsStock(item.cat) && <div><label style={{ display: "block", fontSize: 10, color: "#666" }}>Stock?</label><select value={item.inStock ? "y" : "n"} onChange={e => updateCart(item.id, "inStock", e.target.value === "y")} style={{ padding: "4px 8px", borderRadius: 4, border: "1px solid #444", background: "#111", color: "#fff", fontSize: 12 }}><option value="y">Yes</option><option value="n">No</option></select></div>}
               <div style={{ textAlign: "right", minWidth: 70 }}><div style={{ fontSize: 10, color: "#666" }}>Lead</div><span style={{ fontSize: 11, fontWeight: 700, color: lt.includes("1") || lt === "In Stock" ? "#4caf50" : O }}>{lt}</span></div>
@@ -324,11 +324,11 @@ function AdminPage() {
   }
 
   // Pump CRUD
-  const startAddPump = () => { setEditId("new"); setForm({ cat: "CD Pumps", series: "", model: "", hp: "", voltage: "", part_number: "", connection: "", net_price: "" }) }
+  const startAddPump = () => { setEditId("new"); setForm({ cat: "CD Pumps", series: "", model: "", hp: "", voltage: "", part_number: "", connection: "", list_price: "", net_price: "" }) }
   const startEditPump = p => { setEditId(p.id); setForm({ ...p }) }
   const savePump = async () => {
-    if (!form.model || !form.part_number || !form.net_price) { alert("Model, Part # and NET price required"); return }
-    const data = { cat: form.cat, series: form.series, model: form.model, hp: form.hp, voltage: form.voltage, part_number: form.part_number, connection: form.connection, net_price: parseFloat(form.net_price) }
+    if (!form.model || !form.part_number || !form.list_price) { alert("Model, Part # and LIST price required"); return }
+    const data = { cat: form.cat, series: form.series, model: form.model, hp: form.hp, voltage: form.voltage, part_number: form.part_number, connection: form.connection, list_price: parseFloat(form.list_price), net_price: parseFloat(form.net_price || 0) }
     if (editId === "new") { await supabase.from('pumps').insert(data) }
     else { await supabase.from('pumps').update(data).eq('id', editId) }
     setEditId(null); loadData()
@@ -373,7 +373,7 @@ function AdminPage() {
             <div style={{ background: "#1a1a1a", border: `1px solid ${O}`, borderRadius: 8, padding: 16, marginBottom: 16 }}>
               <h3 style={{ color: O, fontSize: 13, fontWeight: 700, marginBottom: 12 }}>{editId === "new" ? "Add New Pump" : "Edit Pump"}</h3>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8 }}>
-                {[["cat", "Category"], ["series", "Series"], ["model", "Model"], ["hp", "HP"], ["voltage", "Voltage"], ["part_number", "Part Number"], ["connection", "Connection"], ["net_price", "NET Price ($)"]].map(([k, l]) => (
+                {[["cat", "Category"], ["series", "Series"], ["model", "Model"], ["hp", "HP"], ["voltage", "Voltage"], ["part_number", "Part Number"], ["connection", "Connection"], ["list_price", "LIST Price ($)"], ["net_price", "NET Price ($)"]].map(([k, l]) => (
                   <div key={k}><label style={{ display: "block", fontSize: 10, color: "#888", marginBottom: 2 }}>{l}</label>
                     {k === "cat" ? <select value={form[k] || ""} onChange={e => setForm({ ...form, [k]: e.target.value })} style={iStyle}>{["CD Pumps", "CD Pumps (1PH)", "CD Wet Ends", "Tigercubs", "TC Add-ons", "Ocelot", "Duplex Add-ons", "T1HS", "TMHS", "Motors", "Accessories"].map(c => <option key={c}>{c}</option>)}</select>
                       : <input value={form[k] || ""} onChange={e => setForm({ ...form, [k]: e.target.value })} style={iStyle} />}
@@ -388,7 +388,7 @@ function AdminPage() {
           )}
           <div style={{ maxHeight: 400, overflowY: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead><tr>{["Cat", "Series", "Model", "HP", "Voltage", "Part #", "Connection", "NET", "Actions"].map(h => <th key={h} style={{ position: "sticky", top: 0, background: "#1a1a1a", color: O, fontSize: 10, fontWeight: 700, padding: "8px 6px", textAlign: h === "NET" ? "right" : "left", borderBottom: `2px solid ${O}` }}>{h}</th>)}</tr></thead>
+              <thead><tr>{["Cat", "Series", "Model", "HP", "Voltage", "Part #", "Connection", "LIST", "NET", "Actions"].map(h => <th key={h} style={{ position: "sticky", top: 0, background: "#1a1a1a", color: O, fontSize: 10, fontWeight: 700, padding: "8px 6px", textAlign: (h === "NET" || h === "LIST") ? "right" : "left", borderBottom: `2px solid ${O}` }}>{h}</th>)}</tr></thead>
               <tbody>
                 {filteredPumps.map(p => (
                   <tr key={p.id}>
@@ -399,7 +399,8 @@ function AdminPage() {
                     <td style={cellStyle}>{p.voltage}</td>
                     <td style={{ ...cellStyle, color: "#666" }}>{p.part_number}</td>
                     <td style={cellStyle}>{p.connection}</td>
-                    <td style={{ ...cellStyle, textAlign: "right", fontWeight: 600, color: "#fff" }}>{fmt(p.net_price)}</td>
+                    <td style={{ ...cellStyle, textAlign: "right", fontWeight: 600, color: "#fff" }}>{fmt(p.list_price)}</td>
+                    <td style={{ ...cellStyle, textAlign: "right", color: "#aaa" }}>{fmt(p.net_price)}</td>
                     <td style={{ ...cellStyle, whiteSpace: "nowrap" }}>
                       <button onClick={() => startEditPump(p)} style={{ background: "none", border: "none", color: O, cursor: "pointer", fontSize: 11, fontWeight: 600, marginRight: 8 }}>Edit</button>
                       <button onClick={() => deletePump(p.id)} style={{ background: "none", border: "none", color: "#666", cursor: "pointer", fontSize: 11 }}>Delete</button>
