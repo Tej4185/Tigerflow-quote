@@ -317,7 +317,7 @@ function AdminPage() {
   useEffect(() => { loadData() }, [])
 
   const loadData = async () => {
-    const { data: p } = await supabase.from('pumps').select('*').order('cat').order('model')
+    const { data: p } = await supabase.from('pumps').select('*').order('sort_order', { ascending: true }).order('model', { ascending: true })
     const { data: c } = await supabase.from('customers').select('*').order('name')
     const { data: u } = await supabase.from('profiles').select('*').order('created_at')
     if (p) setPumps(p); if (c) setCustomers(c); if (u) setUsers(u)
